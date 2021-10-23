@@ -1,101 +1,149 @@
 #include <iostream>
-#include <cmath>
+#include <string>
 
 using namespace std;
 
-class Point{
-    long long x, y;
-public:
-    Point(long long new_x, long long new_y){x = new_x; y = new_y; }
-    Point(){x = 0; y = 0; }
-    long long get_x(){return x; }
-    long long get_y(){return y; }
-    void set_x(long long new_x) {x = new_x; }
-    void set_y(long long new_y) {y = new_y; }
-
-    Point operator+(Point);
-    Point operator-(Point);
-    Point operator*(long long);
-    long long operator*(Point);
-    long long operator%(Point);
-    bool operator==(Point);
-    bool operator!=(Point);
-    friend ostream& operator<<(ostream&, const Point&);
-    long long length() { return x * x + y * y; }
+struct Node{
+    Node* next;
+    string data;
+    Node() {
+        data = "";
+        next = nullptr;
+    }
 };
 
-Point Point::operator+(Point a) {
-    return Point(x + a.x, y + a.y);
-}
-
-Point Point::operator-(Point a) {
-    return Point(x - a.x, y - a.y);
-}
-
-Point Point::operator*(long long k) {
-    return Point(x * k, y * k);
-}
-
-long long Point::operator*(Point a) {
-    return x * a.x + y * a.y;
-}
-
-long long Point::operator%(Point a) {
-    return x * a.y - y * a.x;
-}
-
-ostream& operator<<(ostream& out, const Point& a) {
-    return out << '(' << a.x << ", " << a.y << ')';
-}
-
-bool Point::operator==(Point a) {
-    if (a.x == x && a.y == y) {
-        return true;
+struct List{
+    Node* head;
+    int n;
+public:
+    List() {
+        head = nullptr;
+        n = 0;
     }
-    return false;
-}
 
-bool Point::operator!=(Point a) {
-    if (a.x == x && a.y == y) {
+    bool empty() {
+        if (n == 0) {
+            return true;
+        }
         return false;
     }
-    return true;
+
+    void push_front(string& a) {
+        Node x;
+        x.data = a;
+        x.next = head;
+        head = &x;
+        n++;
+    }
+
+    void push_back(string& a) {
+        Node x;
+        x.data = a;
+        Node* node = head;
+        for (int i = 0; i < n - 1; i++) {
+            node = node -> next;
+        }
+        node -> next = &x;
+        n++;
+    }
+
+    void push_pos(string& a, int k) {
+        Node x;
+        x.data = a;
+        if (k <= n) {
+            if (k != 0) {
+                Node* node = head;
+                for (int i = 0; i < k - 1; i++) {
+                    node = node -> next;
+                }
+                auto next_elem = node -> next;
+                x.next = next_elem;
+                node -> next = &x;
+                n++;
+            } else {
+                push_front(a);
+            }
+        }
+    }
+
+    void pop_front() {
+        if (n != 0) {
+            head = (*head).next;
+            n--;
+        }
+    }
+
+    void pop_back() {
+        if (n != 0) {
+            Node* node = head;
+            for (int i = 0; i < n - 1; i++) {
+                node = node -> next;
+            }
+            node -> next = node -> next -> next;
+            n--;
+        }
+    }
+
+    void pop_pos(int k) {
+        if (k <= n) {
+            Node* node = head;
+            for (int i = 0; i < k - 1; i++) {
+                node = node -> next;
+            }
+            node -> next = (*node -> next).next;
+            n--;
+        }
+    }
+
+    void pop_value(string a) {
+        Node* node = head;
+        int index = -1;
+        for (int i = 0; i < n; i++) {
+            if (node -> data == a) {
+                index = i;
+            }
+            node = node -> next;
+        }
+        if (index != -1) {
+            pop_pos(index);
+        }
+    }
+
+    int find_pos(string a) {
+        Node* node = head;
+        int index = -1;
+        for (int i = 0; i < n; i++) {
+            if (node->data == a) {
+                index = i;
+            }
+            node = node->next;
+        }
+        return index;
+    }
+
+    string& operator[] (int index);
+    friend ostream& operator<< (std::ostream &out, List &list);
+};
+
+string& List::operator[](int index) {
+    Node* node = head;
+    for (int i = 0; i < index; i++) {
+        node = node -> next;
+    }
+    return (*node).data;
 }
 
-double get_angle(Point& a, Point& b) {
-    long long x1 = a.get_x(), y1 = a.get_y();
-    long long x2 = b.get_x(), y2 = b.get_y();
-    return atan2(y2, x2) - atan2(y1, x1);
+ostream& operator<< (ostream& out, List &list) {
+    for (int i = 0; i < list.n; i++) {
+        out << list[i];
+    }
+    return out;
 }
 
 int main() {
-    long long ax, ay, bx, by;
-    cout << "Enter cord of first vector: ";
-    cin >> ax >> ay;
-    Point a(ax, ay);
-    cout << "Enter cord of second vetor: ";
-    cin >> bx >> by;
-    Point b(bx, by);
-    cout << "Sum of two vectors: " << a + b << endl;
-    cout << "Difference of two vectors: " << a - b << endl;
-    cout << "Enter an integer by which you want to multiply the first vector: ";
-    long long k;
-    cin >> k;
-    cout << "Multiply first vector by a k: " << a * k << endl;
-    cout << "Scalar product of vectors: " << a * b << endl;
-    cout << "Skew product of vectors: " << a % b << endl;
-    cout << "Is the first vector equal to the second vector: ";
-    if (a == b) {
-        cout << "true" << endl;
-    } else {
-        cout << "false" << endl;
-    }
-    cout << "Is the first vector not equal to the second vector: ";
-    if (a != b) {
-        cout << "true" << endl;
-    } else {
-        cout << "false" << endl;
-    }
-    cout << "Square of the length of the first and second vectors: " << a.length() << ' ' << b.length() << endl;
-    cout << "Directional angle from the first vector to second vector: " << get_angle(a, b) << endl;
+    List list;
+    cout << "List.empty with empty list " << list.empty() << '\n';
+    string a = "counter";
+    list.push_front(a);
+    cout << "first elem by head " << list.n << ' ' << (*list.head).data << '\n';
 }
