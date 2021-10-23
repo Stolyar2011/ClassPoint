@@ -145,5 +145,5 @@ int main() {
     cout << "List.empty with empty list " << list.empty() << '\n';
     string a = "counter";
     list.push_front(a);
-    cout << "first elem by head " << list.n << ' ' << (*list.head).data << '\n';
+    cout << "first elem by head " << list.n << ' ' << (*list.head).data <<  '\n';
 }
