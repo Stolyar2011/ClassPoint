@@ -1,5 +1,7 @@
+#define _GLIBCXX_DEBUG
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -29,27 +31,31 @@ public:
     }
 
     void push_front(string& a) {
-        Node x;
-        x.data = a;
-        x.next = head;
-        head = &x;
+        Node* x = new Node;
+        x -> data = a;
+        x -> next = head;
+        head = x;
         n++;
     }
 
     void push_back(string& a) {
-        Node x;
-        x.data = a;
-        Node* node = head;
-        for (int i = 0; i < n - 1; i++) {
-            node = node -> next;
+        Node* x = new Node;
+        x -> data = a;
+        if(n != 0) {
+            Node *node = head;
+            for (int i = 0; i < n - 1; i++) {
+                node = node->next;
+            }
+            node->next = x;
+        } else {
+            head = x;
         }
-        node -> next = &x;
         n++;
     }
 
     void push_pos(string& a, int k) {
-        Node x;
-        x.data = a;
+        Node* x = new Node;
+        x -> data = a;
         if (k <= n) {
             if (k != 0) {
                 Node* node = head;
@@ -57,8 +63,8 @@ public:
                     node = node -> next;
                 }
                 auto next_elem = node -> next;
-                x.next = next_elem;
-                node -> next = &x;
+                x -> next = next_elem;
+                node -> next = x;
                 n++;
             } else {
                 push_front(a);
@@ -68,7 +74,8 @@ public:
 
     void pop_front() {
         if (n != 0) {
-            head = (*head).next;
+            delete head;
+            head = head -> next;
             n--;
         }
     }
@@ -79,8 +86,7 @@ public:
             for (int i = 0; i < n - 1; i++) {
                 node = node -> next;
             }
-            node -> next = node -> next -> next;
-            n--;
+
         }
     }
 
@@ -90,12 +96,14 @@ public:
             for (int i = 0; i < k - 1; i++) {
                 node = node -> next;
             }
-            node -> next = (*node -> next).next;
+            Node* next_elem = node -> next -> next;
+            delete node -> next;
+            node -> next = next_elem;
             n--;
         }
     }
 
-    void pop_value(string a) {
+    void pop_value(string& a) {
         Node* node = head;
         int index = -1;
         for (int i = 0; i < n; i++) {
@@ -109,16 +117,15 @@ public:
         }
     }
 
-    int find_pos(string a) {
+    int find_pos(string& a) {
         Node* node = head;
-        int index = -1;
         for (int i = 0; i < n; i++) {
             if (node->data == a) {
-                index = i;
+                return i;
             }
             node = node->next;
         }
-        return index;
+        return -1;
     }
 
     string& operator[] (int index);
@@ -133,17 +140,65 @@ string& List::operator[](int index) {
     return (*node).data;
 }
 
-ostream& operator<< (ostream& out, List &list) {
-    for (int i = 0; i < list.n; i++) {
-        out << list[i];
+ostream& operator<< (ostream& out, List &lis) {
+    Node* node = lis.head;
+    while (node != nullptr) {
+        out << node -> data << ' ';
+        node = node -> next;
     }
     return out;
 }
 
 int main() {
-    List list;
-    cout << "List.empty with empty list " << list.empty() << '\n';
-    string a = "counter";
-    list.push_front(a);
-    cout << "first elem by head " << list.n << ' ' << (*list.head).data <<  '\n';
+    List lis;
+    string back, front, index, delete_by_value;
+    int k, from_front, from_back, by_index;
+    string s = "counter";
+    lis.push_back(s);
+    cout << "Введем список";
+    vector<string> memory = {"apple", "home", "robbery", "car", "point", "vector", "internet"};
+    for (auto q : memory) {
+        lis.push_back(q);
+    }
+
+    cout << "Введите строку, которая будет добавлена в конец списка: ";
+    getline(cin, back);
+    cout << "Введите строку, которая будет добавлена в начало списка: ";
+    getline(cin, front);
+    cout << "Введите в отдельных строках, строку и индекс принадлежащий интервалу [0, 8]";
+    getline(cin, index);
+    cin >> k;
+    lis.push_back(back);
+    lis.push_front(front);
+    lis.push_pos(index, k);
+
+    cout << "Выведем список и его длину: " << lis.n << '\n' << lis << endl;
+    cout << "Введите строку, которую хотите удалить по значению ";
+    getline(cin, delete_by_value);
+    getline(cin, delete_by_value);
+    cout << "Введите колличество элементов, которые вы хотите удалить из начала списка ";
+    cin >> from_front;
+    cout << "Введите колличество элементов, которые вы хотите удалить из конца списка ";
+    cin >> from_back;
+    cout << "Введите индекс элемента, который будет удален ";
+    cout << "Удалим все эти элементы";
+    lis.pop_value(delete_by_value);
+    for (int i = 0; i < from_front; i++) {
+        lis.pop_front();
+    }
+    for (int i = 0; i < from_back; i++) {
+        lis.pop_back();
+    }
+    lis.pop_pos(by_index);
+    cout << "Выведем список на экран " << lis;
+    cout << "Введите строку, индекс которой вы хотите найти в списке ";
+    string find;
+    getline(cin, find);
+    getline(cin, find);
+    k = lis.find_pos(find);
+    if (k == -1) {
+        cout << "Такой строки нет в списке" << '\n';
+    } else {
+        cout << "Инлекс данной строки в списке: " << k << '\n';
+    }
 }
